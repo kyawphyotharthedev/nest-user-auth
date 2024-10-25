@@ -1,18 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as express from 'express';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import { Handler, Context, Callback } from 'aws-lambda';
-import serverlessExpress from '@vendia/serverless-express';
 
-const expressApp = express();
-
-async function createNestServer() {
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(expressApp),
-  );
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
     .addBearerAuth(
@@ -33,12 +24,4 @@ async function createNestServer() {
 
   await app.listen(process.env.PORT || 8001, process.env.HOST || '127.0.0.1');
 }
-createNestServer();
-
-export const handler: Handler = (
-  event: any,
-  context: Context,
-  callback: Callback,
-) => {
-  serverlessExpress({ app: expressApp })(event, context, callback);
-};
+bootstrap();
